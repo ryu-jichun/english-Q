@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중학교 2학년 영어 퀴즈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .quiz-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .quiz-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e7ff;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+        }
+        
+        .question-number {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .option:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .result-message {
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pronunciation-btn {
+            background: linear-gradient(90deg, #f59e0b, #f97316);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-left: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .pronunciation-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .option-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1 class="quiz-title">🇺🇸 영어 퀴즈</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="question-number" id="questionNumber">질문 1 / 10</div>
+        </div>
+        
+        <div class="question-container" id="questionContainer">
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">정답 확인</button>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-score" id="resultScore"></div>
+            <div class="result-message" id="resultMessage"></div>
+            <button class="restart-btn" onclick="restartQuiz()">다시 시작</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "다음 중 '도서관'을 뜻하는 영어 단어는?",
+                options: ["Library", "Laboratory", "Laundry", "Lottery"],
+                correct: 0,
+                pronunciation: ["L-I-B-R-A-R-Y, Library", "L-A-B-O-R-A-T-O-R-Y, Laboratory", "L-A-U-N-D-R-Y, Laundry", "L-O-T-T-E-R-Y, Lottery"]
+            },
+            {
+                question: "I ____ breakfast every morning. 빈칸에 알맞은 단어는?",
+                options: ["eat", "eats", "eating", "ate"],
+                correct: 0,
+                pronunciation: ["E-A-T, eat", "E-A-T-S, eats", "E-A-T-I-N-G, eating", "A-T-E, ate"]
+            },
+            {
+                question: "'어제'를 영어로 올바르게 쓴 것은?",
+                options: ["Yesterday", "Tomorrow", "Today", "Tonight"],
+                correct: 0,
+                pronunciation: ["Y-E-S-T-E-R-D-A-Y, Yesterday", "T-O-M-O-R-R-O-W, Tomorrow", "T-O-D-A-Y, Today", "T-O-N-I-G-H-T, Tonight"]
+            },
+            {
+                question: "She is ____ than her sister. (더 키가 큰)",
+                options: ["tall", "taller", "tallest", "more tall"],
+                correct: 1,
+                pronunciation: ["T-A-L-L, tall", "T-A-L-L-E-R, taller", "T-A-L-L-E-S-T, tallest", "more tall"]
+            },
+            {
+                question: "다음 중 복수형이 올바른 것은?",
+                options: ["childs", "children", "childrens", "child"],
+                correct: 1,
+                pronunciation: ["childs", "C-H-I-L-D-R-E-N, children", "childrens", "C-H-I-L-D, child"]
+            },
+            {
+                question: "What time ____ you get up? 빈칸에 알맞은 것은?",
+                options: ["do", "does", "are", "is"],
+                correct: 0,
+                pronunciation: ["D-O, do", "D-O-E-S, does", "A-R-E, are", "I-S, is"]
+            },
+            {
+                question: "'그들은 축구를 하고 있다'를 영어로 쓰면?",
+                options: ["They play soccer", "They are playing soccer", "They played soccer", "They will play soccer"],
+                correct: 1,
+                pronunciation: ["They play soccer", "They are playing soccer", "They played soccer", "They will play soccer"]
+            },
+            {
+                question: "다음 중 '날씨'를 뜻하는 단어는?",
+                options: ["Whether", "Weather", "Water", "Winter"],
+                correct: 1,
+                pronunciation: ["W-H-E-T-H-E-R, Whether", "W-E-A-T-H-E-R, Weather", "W-A-T-E-R, Water", "W-I-N-T-E-R, Winter"]
+            },
+            {
+                question: "I have ____ books. (많은)",
+                options: ["much", "many", "a lot", "few"],
+                correct: 1,
+                pronunciation: ["M-U-C-H, much", "M-A-N-Y, many", "a lot", "F-E-W, few"]
+            },
+            {
+                question: "다음 중 과거형이 올바른 것은?",
+                options: ["goed", "went", "go", "going"],
+                correct: 1,
+                pronunciation: ["goed", "W-E-N-T, went", "G-O, go", "G-O-I-N-G, going"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = -1;
+        let answered = false;
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `질문 ${currentQuestion + 1} / ${questions.length}`;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                
+                const containerDiv = document.createElement('div');
+                containerDiv.className = 'option-container';
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = option;
+                
+                const pronounceBtn = document.createElement('button');
+                pronounceBtn.className = 'pronunciation-btn';
+                pronounceBtn.innerHTML = '🔊';
+                pronounceBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    pronounceText(question.pronunciation[index]);
+                };
+                
+                containerDiv.appendChild(textSpan);
+                containerDiv.appendChild(pronounceBtn);
+                optionDiv.appendChild(containerDiv);
+                
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('feedback').style.display = 'none';
+            selectedAnswer = -1;
+            answered = false;
+            
+            // Update progress bar
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, i) => {
+                option.classList.remove('selected');
+                if (i === index) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function submitAnswer() {
+            if (selectedAnswer === -1 || answered) return;
+            
+            answered = true;
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedAnswer === question.correct) {
+                score++;
+                feedback.textContent = '정답입니다! 🎉';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `틀렸습니다. 정답은 "${question.options[question.correct]}" 입니다.`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            
+            document.getElementById('submitBtn').textContent = currentQuestion === questions.length - 1 ? '결과 보기' : '다음 문제';
+            document.getElementById('submitBtn').onclick = nextQuestion;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion >= questions.length) {
+                showResults();
+            } else {
+                document.getElementById('submitBtn').textContent = '정답 확인';
+                document.getElementById('submitBtn').onclick = submitAnswer;
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('resultScore').textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🏆 완벽해요! 영어 실력이 정말 좋네요!';
+            } else if (percentage >= 70) {
+                message = '👏 잘했어요! 조금만 더 노력하면 완벽할 거예요!';
+            } else if (percentage >= 50) {
+                message = '📚 괜찮아요! 더 열심히 공부해봐요!';
+            } else {
+                message = '💪 다시 도전해보세요! 포기하지 마세요!';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
+            
+            // Update progress bar to 100%
+            document.getElementById('progressFill').style.width = '100%';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = -1;
+            answered = false;
+            
+            document.getElementById('questionContainer').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        function pronounceText(text) {
+            if ('speechSynthesis' in window) {
+                // Stop any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Try to use English voice
+                const voices = window.speechSynthesis.getVoices();
+                const englishVoice = voices.find(voice => 
+                    voice.lang.includes('en') && voice.name.includes('female')
+                ) || voices.find(voice => voice.lang.includes('en'));
+                
+                if (englishVoice) {
+                    utterance.voice = englishVoice;
+                }
+                
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8; // Slower for learning
+                utterance.pitch = 1.2; // Slightly higher pitch
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('죄송합니다. 이 브라우저는 음성 기능을 지원하지 않습니다.');
+            }
+        }
+
+        // Load voices when available
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                // Voices are loaded
+            };
+        }
+
+        // Initialize quiz
+        loadQuestion();
+    </script>
+</body>
+</html>
